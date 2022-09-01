@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jing.dao.HouseDao">
+    <!--分页查询-->
+    <select id="findPage" resultType="house">
+        select * from hse_house
+        <where>
+            <if test="name!=null and name != ''">
+                name like "%"#{name}"%"
+            </if>
+            <if test="communityId!=null and communityId!=''">
+                and community_id=#{communityId}
+            </if>
+            <if test="houseTypeId!=null and houseTypeId != ''">
+                and house_type_id=#{houseTypeId}
+            </if>
+            <if test="floorId!=null and floorId != ''">
+                and floor_id=#{floorId}
+            </if>
+            <if test="buildStructureId!=null and buildStructureId != ''">
+                and build_structure_id=#{buildStructureId}
+            </if>
+            <if test="directionId!=null and directionId != ''">
+                and direction_id=#{directionId}
+            </if>
+            <if test="decorationId!=null and decorationId != ''">
+                and decoration_id=#{decorationId}
+            </if>
+            <if test="houseUseId!=null and houseUseId != ''">
+                and house_use_id=#{houseUseId}
+            </if>
+
+            and is_deleted = 0
+        </where>
+    </select>
+
+
+    <!--添加房屋信息-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into hse_house
+            (community_id, name, description, total_price,
+             unit_price, build_area, inside_area, house_type_id,
+             floor_id, build_structure_id, direction_id, decoration_id,
+             house_use_id, elevator_ratio, listing_date, last_trade_date)
+             values (#{communityId},#{name},#{description},#{totalPrice},
+                     #{unitPrice},#{buildArea},#{insideArea},#{houseTypeId},
+                     #{floorId},#{buildStructureId},#{directionId},#{decorationId},
+                     #{houseUseId},#{elevatorRatio},#{listingDate},#{lastTradeDate})
+    </insert>
+
+    <!--修改房屋信息-->
+    <update id="update">
+        update hse_house
+        <set>
+            <if test="communityId != null">
+                community_id = #{communityId},
+            </if>
+            <if test="name != null">
+                name = #{name} ,
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="totalPrice != null">
+                total_price = #{totalPrice},
+            </if>
+            <if test="unitPrice != null">
+                unit_price = #{unitPrice},
+            </if>
+            <if test="buildArea != null">
+                build_area = #{buildArea},
+            </if>
+            <if test="insideArea != null">
+                inside_area = #{insideArea},
+            </if>
+            <if test="houseTypeId != null">
+                house_type_id = #{houseTypeId},
+            </if>
+            <if test="floorId != null">
+                floor_id = #{floorId},
+            </if>
+            <if test="buildStructureId != null">
+                build_structure_id = #{buildStructureId},
+            </if>
+            <if test="directionId != null">
+                direction_id = #{directionId},
+            </if>
+            <if test="decorationId != null">
+                decoration_id = #{decorationId},
+            </if>
+            <if test="houseUseId != null">
+                house_use_id = #{houseUseId},
+            </if>
+            <if test="elevatorRatio != null">
+                elevator_ratio = #{elevatorRatio},
+            </if>
+            <if test="listingDate != null">
+                listing_date = #{listingDate},
+            </if>
+            <if test="lastTradeDate != null">
+                last_trade_date = #{lastTradeDate},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            update_time = now()
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--根据id查找房源信息-->
+    <select id="getById" resultMap="myHouseInfo">
+        select * from hse_house where is_deleted=0 and id=#{id}
+    </select>
+    <resultMap id="myHouseInfo" type="house" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="houseTypeId"  column="house_type_id"/>
+        <result property="floorId"  column="floor_id"/>
+        <result property="buildStructureId"  column="build_structure_id"/>
+        <result property="directionId"  column="direction_id" />
+        <result property="decorationId"  column="decoration_id"/>
+        <result property="houseUseId" column="house_use_id"/>
+        <association property="houseTypeName" select="com.jing.dao.DictDao.getNameById"  column="house_type_id" fetchType="eager"/>
+        <association property="floorName" select="com.jing.dao.DictDao.getNameById"  column="floor_id" fetchType="eager"/>
+        <association property="buildStructureName" select="com.jing.dao.DictDao.getNameById"  column="build_structure_id" fetchType="eager"/>
+        <association property="directionName" select="com.jing.dao.DictDao.getNameById"  column="direction_id" fetchType="eager"/>
+        <association property="decorationName" select="com.jing.dao.DictDao.getNameById"  column="decoration_id" fetchType="eager"/>
+        <association property="houseUseName" select="com.jing.dao.DictDao.getNameById"  column="house_use_id" fetchType="eager"/>
+
+    </resultMap>
+
+
+    
+    <!--删除房源信息-->
+    <update id="delete">
+        update hse_house set is_deleted=1,update_time=now() where id=#{id}
+    </update>
+
+    <!--findPageList-->
+
+    <select id="findPageList" resultMap="houseVo">
+        select h.id, h.name,
+               h.total_price, h.unit_price,
+               h.build_area, h.house_type_id,
+               h.floor_id, h.direction_id,
+               h.default_image_url, h.create_time,c.name community_name
+        from hse_house h join hse_community c on h.community_id = c.id
+            <where>
+                <if test="areaId != '' and areaId != null">
+                    and c.area_id=#{areaId}
+                </if>
+                <if test="plateId != '' and plateId != null">
+                    and c.plate_id=#{plateId}
+                </if>
+                <if test="totalPrice != '' and totalPrice != null">
+                    and h.total_price=#{totalPrice}
+                </if>
+                <if test="houseTypeId != '' and houseTypeId != null">
+                    and h.house_type_id=#{houseTypeId}
+                </if>
+                <if test="floorId != '' and floorId != null">
+                    and h.floor_id=#{floorId}
+                </if>
+                <if test="buildStructureId != '' and buildStructureId != null">
+                    and h.build_structure_id=#{buildStructureId}
+                </if>
+                <if test="directionId != '' and directionId != null">
+                    and h.direction_id=#{directionId}
+                </if>
+                <if test="decorationId != '' and decorationId != null">
+                    and h.decoration_id=#{decorationId}
+                </if>
+                <if test="houseUseId != '' and houseUseId != null">
+                    and h.house_use_id=#{houseUseId}
+                </if>
+                and h.status = 1
+                and h.is_deleted = 0
+                and c.is_deleted = 0
+            </where>
+            <if test="defaultSort == 1">
+                order by h.id desc
+            </if>
+            <if test="priceSort == 1">
+                order by h.total_price desc
+            </if>
+            <if test="timeSort == 1">
+                order by h.create_time desc
+            </if>
+    </select>
+
+    <resultMap id="houseVo" type="com.jing.vo.HouseVo" autoMapping="true">
+        <result column="community_name" property="communityName"/>
+        <association property="houseTypeName" select="com.jing.dao.DictDao.getNameById" column="house_use_id" fetchType="eager"/>
+        <association property="floorName" select="com.jing.dao.DictDao.getNameById" column="floor_id" fetchType="eager"/>
+        <association property="directionName" select="com.jing.dao.DictDao.getNameById" column="direction_id" fetchType="eager"/>
+    </resultMap>
+</mapper>

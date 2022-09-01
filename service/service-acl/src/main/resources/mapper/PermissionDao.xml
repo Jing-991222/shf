@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jing.dao.PermissionDao">
+    <select id="findAll" resultType="permission">
+        select * from acl_permission where is_deleted=0 order by sort
+    </select>
+
+
+    <!--根据用户id获取所有的菜单信息-->
+    <select id="findListByAdminId" resultType="permission">
+        select p.* from acl_admin_role a
+            join acl_role_permission r
+                on a.role_id = r.role_id
+            join acl_permission p
+                on r.permission_id = p.id
+        where
+        a.admin_id = #{adminId}
+        and a.is_deleted = 0
+        and r.is_deleted = 0
+        and p.is_deleted = 0
+        and p.type = 1
+    </select>
+
+
+    <select id="findAllCode" resultType="string">
+        select code from acl_permission where is_deleted = 0 and type = 2
+    </select>
+
+    <select id="findCodeListByAdminId" resultType="string">
+        select p.code from acl_admin_role a
+            join acl_role_permission r
+                 on a.role_id = r.role_id
+            join acl_permission p
+                 on r.permission_id = p.id
+        where
+            a.admin_id = #{adminId}
+          and a.is_deleted = 0
+          and r.is_deleted = 0
+          and p.is_deleted = 0
+          and p.type = 2
+    </select>
+</mapper>
