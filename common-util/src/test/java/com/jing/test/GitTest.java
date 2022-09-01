@@ -7,4 +7,9 @@ public class GitTest {
     public void save(){
         System.out.println("-----save-----");
     }
+    @Test
+    public void update(){
+        System.out.println("-----dev-----");
+    }
+
 }
